@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from post.models import Category
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'ordering']
+    list_display_links = ['name', 'slug']

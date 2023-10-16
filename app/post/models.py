@@ -18,6 +18,10 @@ class Category(models.Model):
     slug = models.SlugField(max_length=255, null=True, blank=True)
     ordering = OrderField(unique_to='user', null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'category'
+        verbose_name_plural = 'categories'
+
     def clean(self):
         """Check if slug is unique for related user."""
 
