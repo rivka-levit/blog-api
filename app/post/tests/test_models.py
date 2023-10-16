@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from post.models import Category
+from post.models import Category, Author
 
 
 def create_category(user, **params):
@@ -57,3 +57,13 @@ class ModelTests(TestCase):
 
         with self.assertRaises(ValidationError):
             create_category(self.user, name='Another Name', ordering=5)
+
+    def test_create_author_success(self):
+        """Test creating an author successfully."""
+
+        payload = {'name': 'Author N. Name'}
+        author = Author.objects.create(user=self.user, **payload)
+
+        self.assertTrue(Author.objects.filter(name=payload['name']).exists())
+        self.assertEqual(str(author), payload['name'])
+        self.assertEqual(author.slug, slugify(payload['name']))
