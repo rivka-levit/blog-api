@@ -150,3 +150,47 @@ class Post(models.Model):
         """Return a string representation of the object."""
 
         return self.title
+
+
+class Section(models.Model):
+    """Text sections of the post object."""
+
+    user = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sections'
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE,
+        related_name='sections'
+    )
+    ordering = OrderField(unique_to='post', null=True, blank=True)
+    sub_title = models.CharField(max_length=255, null=True, blank=True)
+    content = models.TextField()
+
+    def clean(self):
+        """Check if ordering number is unique for the particula post."""
+
+        qs = Section.objects.filter(
+            user=self.user, ordering=self.ordering
+        ).exclude(pk=self.pk)
+
+        if qs:
+            raise ValidationError(
+                'The ordering number of a category must be unique for this '
+                'particular post.'
+            )
+
+    def save(self, *args, **kwargs):
+        """Auto field creation and validation before saving."""
+
+        self.full_clean()
+        return super(Section, self).save(*args, **kwargs)
+
+    def __str__(self):
+        """Return a string representation of the object."""
+
+        sub_title = self.sub_title if self.sub_title else ''
+
+        return f'{self.ordering}. {sub_title}'
