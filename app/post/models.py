@@ -5,6 +5,18 @@ from django.utils.text import slugify
 
 from core.fields import OrderField
 
+import os
+import uuid
+
+
+def post_image_file_path(instance, filename):
+    """Generate file path for a new post image."""
+
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+
+    return os.path.join('uploads', 'images', filename)
+
 
 class Category(models.Model):
     """Object of the categories in the blog."""
@@ -109,6 +121,11 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=255, null=True, blank=True)
     excerpt = models.TextField(max_length=1000, null=True, blank=True)
+    image = models.ImageField(
+        upload_to=post_image_file_path,
+        null=True,
+        blank=True
+    )
     category = models.ForeignKey(
         to=Category,
         on_delete=models.CASCADE,
