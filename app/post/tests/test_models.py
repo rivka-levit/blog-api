@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from post.models import Category, Author
+from post.models import Category, Author, Post, Section
 
 
 def create_category(user, **params):
@@ -19,6 +19,19 @@ def create_category(user, **params):
     defaults.update(**params)
 
     return Category.objects.create(user=user, **defaults)
+
+
+def create_post(user, **params):
+    """Create and return a sample post."""
+
+    defaults = {
+        'title': 'Sample Post Title',
+        'excerpt': 'Sample post excerpt.',
+        'time_read': 3
+    }
+    defaults.update(**params)
+
+    return Post.objects.create(user=user, **defaults)
 
 
 class ModelTests(TestCase):
@@ -67,3 +80,61 @@ class ModelTests(TestCase):
         self.assertTrue(Author.objects.filter(name=payload['name']).exists())
         self.assertEqual(str(author), payload['name'])
         self.assertEqual(author.slug, slugify(payload['name']))
+
+
+class PostModelTests(TestCase):
+    """Tests for post model."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='test_pass_123'
+        )
+        self.category = create_category(self.user)
+        self.author = Author.objects.create(user=self.user, name='Author Name')
+
+    def test_create_post_success(self):
+        """Test creating a post successfully."""
+
+        payload = {
+            'title': 'Sample Post Title',
+            'excerpt': 'Sample post excerpt.',
+            'category': self.category,
+            'author': self.author,
+            'time_read': 5
+            }
+        post = Post.objects.create(user=self.user, **payload)
+
+        self.assertTrue(Post.objects.filter(title=payload['title']).exists())
+        self.assertEqual(str(post), payload['title'])
+        self.assertEqual(post.slug, slugify(payload['title']))
+        for k, v in payload.items():
+            self.assertEqual(getattr(post, k), v)
+
+    def test_create_section_success(self):
+        """Test creating a section of post."""
+
+        post = create_post(
+            user=self.user,
+            category=self.category,
+            author=self.author
+        )
+
+        s1 = Section.objects.create(
+            user=self.user,
+            post=post,
+            sub_title='Section 1',
+            content='Some post text section.'
+        )
+        s2 = Section.objects.create(
+            user=self.user,
+            post=post,
+            sub_title='Section 2',
+            content='Another post text section.'
+        )
+
+        self.assertEqual(post.sections.all().count(), 2)
+        self.assertEqual(s1.ordering, 1)
+        self.assertEqual(str(s1), '1. Section 1')
+        self.assertEqual(s2.ordering, 2)
+        self.assertEqual(str(s2), '2. Section 2')
