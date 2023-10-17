@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from post.models import Category, Author
+from post.models import Category, Author, Post
 
 
 def create_category(user, **params):
@@ -67,3 +67,33 @@ class ModelTests(TestCase):
         self.assertTrue(Author.objects.filter(name=payload['name']).exists())
         self.assertEqual(str(author), payload['name'])
         self.assertEqual(author.slug, slugify(payload['name']))
+
+
+class PostModelTests(TestCase):
+    """Tests for post model."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='test_pass_123'
+        )
+        self.category = create_category(self.user)
+        self.author = Author.objects.create(user=self.user, name='Author Name')
+
+    def test_create_post_success(self):
+        """Test creating a post successfully."""
+
+        payload = {
+            'title': 'Sample Post Title',
+            'excerpt': 'Sample post excerpt.',
+            'category': self.category,
+            'author': self.author,
+            'time_read': 5
+            }
+        post = Post.objects.create(user=self.user, **payload)
+
+        self.assertTrue(Post.objects.filter(title=payload['title']).exists())
+        self.assertEqual(str(post), payload['title'])
+        self.assertEqual(post.slug, slugify(payload['title']))
+        for k, v in payload.items():
+            self.assertEqual(getattr(post, k), v)
