@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from post.models import Category, Author, Post, Section
+from post.models import Category, Author, Post, Section, Tag
 
 
 def create_category(user, **params):
@@ -138,3 +138,26 @@ class PostModelTests(TestCase):
         self.assertEqual(str(s1), '1. Section 1')
         self.assertEqual(s2.ordering, 2)
         self.assertEqual(str(s2), '2. Section 2')
+
+    def test_create_tag_successful(self):
+        """Test creating a tag successfully."""
+
+        payload = {'name': 'SampleTag'}
+        tag = Tag.objects.create(user=self.user, **payload)
+
+        self.assertTrue(Tag.objects.filter(name=payload['name']).exists())
+        self.assertEqual(str(tag), tag.name)
+
+    def test_assign_tag_to_post(self):
+        """Test assigning a tag to a post."""
+
+        post = create_post(
+            self.user,
+            category=self.category,
+            author=self.author
+        )
+        payload = {'name': 'SampleTag'}
+        tag = Tag.objects.create(user=self.user, **payload)
+        post.tags.add(tag)
+
+        self.assertEqual(post.tags.all().count(), 1)

@@ -211,3 +211,20 @@ class Section(models.Model):
         sub_title = self.sub_title if self.sub_title else ''
 
         return f'{self.ordering}. {sub_title}'
+
+
+class Tag(models.Model):
+    """Tag object."""
+
+    user = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='tags'
+    )
+    post = models.ManyToManyField(to=Post, related_name='tags')
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        """Return a string representation of the object."""
+
+        return self.name
