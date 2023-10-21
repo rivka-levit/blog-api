@@ -154,4 +154,5 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Blog RestAPI',
     'VERSION': '1.0.0',
     'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'/post',
 }

@@ -24,13 +24,14 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from core.views import IndexView
 
 urlpatterns = [
-    path('', IndexView.as_view(), name='index'),
     path('admin/', admin.site.urls),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('docs/',
          SpectacularSwaggerView.as_view(url_name='schema'),
          name='docs'),
     path('user/', include('user.urls', namespace='user')),
+    path('', IndexView.as_view(), name='index'),
+    path('post/', include('post.urls'))
 ]
 
 if settings.DEBUG:
