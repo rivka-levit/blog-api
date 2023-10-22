@@ -56,6 +56,7 @@ class PrivateCategoryTest(TestCase):
 
     def test_retrieve_category_list_successful(self):
         """Test retrieving the list of categories successfully."""
+
         create_category(self.user, name='cat 1')
         create_category(self.user, name='cat 2')
 
