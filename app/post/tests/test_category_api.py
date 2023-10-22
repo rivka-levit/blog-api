@@ -106,6 +106,17 @@ class PrivateCategoryTest(TestCase):
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r.data['ordering'], payload['ordering'])
 
+    def test_retrieve_single_category(self):
+        """Test retrieving one particular category."""
+
+        category = create_category(self.user)
+        url = detail_url(category.slug)
+
+        r = self.client.get(url)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.data['name'], category.name)
+
     def test_update_category_success(self):
         """Test updating a category successfully."""
 
