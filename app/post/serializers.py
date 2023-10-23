@@ -4,7 +4,7 @@ Serializers for Category, Author, Post, Tag objects.
 
 from rest_framework import serializers
 
-from post.models import Category, Author
+from post.models import Category, Author, Post
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -28,3 +28,14 @@ class AuthorDetailSerializer(AuthorSerializer):
 
     class Meta(AuthorSerializer.Meta):
         fields = ['name', 'slug', 'description']
+
+
+class PostSerializer(serializers.ModelSerializer):
+    """Serializer for Post object."""
+    category = CategorySerializer(required=False)
+    author = AuthorSerializer(required=False)
+
+    class Meta:
+        model = Post
+        fields = ['title', 'slug', 'category', 'author', 'excerpt', 'image',
+                  'time_read', 'created_at', 'updated_at']

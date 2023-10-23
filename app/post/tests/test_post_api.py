@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 
 from post.models import Post
 
-POSTS_URL = reverse('posts-list')
+POSTS_URL = reverse('post-list')
 
 
 def detail_url(post_slug):

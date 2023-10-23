@@ -8,19 +8,18 @@ from rest_framework.authentication import TokenAuthentication
 
 from core.permissions import AccessOwnerOnly
 
-from post.models import Category, Author
+from post.models import Category, Author, Post
 from post.serializers import (
     CategorySerializer,
     AuthorSerializer,
-    AuthorDetailSerializer
+    AuthorDetailSerializer,
+    PostSerializer
 )
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    """View for Category APIs."""
+class BaseViewSet(viewsets.ModelViewSet):
+    """Base view set for APIs."""
 
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated, AccessOwnerOnly]
     authentication_classes = [TokenAuthentication]
     lookup_field = 'slug'
@@ -36,19 +35,18 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class AuthorViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(BaseViewSet):
+    """View for Category APIs."""
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class AuthorViewSet(BaseViewSet):
     """View for Author APIs."""
 
     queryset = Author.objects.all()
     serializer_class = AuthorDetailSerializer
-    permission_classes = [IsAuthenticated, AccessOwnerOnly]
-    authentication_classes = [TokenAuthentication]
-    lookup_field = 'slug'
-
-    def get_queryset(self):
-        """Filter the queryset by user."""
-
-        return self.queryset.filter(user=self.request.user)
 
     def get_serializer_class(self):
         """Return the serializer for a particular action."""
@@ -58,7 +56,9 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
         return self.serializer_class
 
-    def perform_create(self, serializer):
-        """Assign the new author to the authenticated user."""
 
-        serializer.save(user=self.request.user)
+class PostViewSet(BaseViewSet):
+    """View for Post APIs."""
+
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer

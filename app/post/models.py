@@ -136,7 +136,9 @@ class Post(models.Model):
     author = models.ForeignKey(
         to=Author,
         on_delete=models.CASCADE,
-        related_name='posts'
+        related_name='posts',
+        null=True,
+        blank=True
     )
     time_read = models.PositiveIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
