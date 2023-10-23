@@ -9,7 +9,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from post.models import Post
+from post.models import Post, Author, Category
 
 POSTS_URL = reverse('post-list')
 
@@ -57,6 +57,11 @@ class PrivatePostTest(TestCase):
             password='test_pass_123'
         )
         self.client.force_authenticate(user=self.user)
+        self.author = Author.objects.create(user=self.user, name='John Dow')
+        self.category = Category.objects.create(
+            user=self.user,
+            name='Sample Category'
+        )
 
     def test_retrieve_post_list_successful(self):
         """Test retrieving the list of posts successfully."""
@@ -129,3 +134,21 @@ class PrivatePostTest(TestCase):
 
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Post.objects.filter(id=post_id).exists())
+
+    def test_create_post_with_category_author(self):
+        """Test creating a post and assigning existing category and author."""
+
+        payload = {
+            'title': 'My Awsome Post',
+            'excerpt': 'Cool excerpt of my post.',
+            'time_read': 7,
+            'category': {'name': self.category.name, 'slug': self.category.slug},
+            'author': {'name': self.author.name, 'slug': self.author.slug}
+        }
+
+        r = self.client.post(POSTS_URL, payload, format='json')
+
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(title=payload['title'])
+        self.assertEqual(post.author, self.author)
+        self.assertEqual(post.category, self.category)
