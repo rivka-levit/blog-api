@@ -152,3 +152,29 @@ class PrivatePostTest(TestCase):
         post = Post.objects.get(title=payload['title'])
         self.assertEqual(post.author, self.author)
         self.assertEqual(post.category, self.category)
+
+    def test_update_post_with_category_author(self):
+        """Test updating the category and the author in a post."""
+
+        post = create_post(self.user)
+
+        payload = {
+            'title': 'New Title',
+            'category': {
+                'name': self.category.name,
+                'slug': self.category.slug
+            },
+            'author': {
+                'name': self.author.name,
+                'slug': self.author.slug
+            }
+        }
+
+        url = detail_url(post.slug)
+        r = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        post.refresh_from_db()
+        self.assertEqual(post.title, payload['title'])
+        self.assertEqual(post.category, self.category)
+        self.assertEqual(post.author, self.author)

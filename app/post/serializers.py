@@ -62,3 +62,24 @@ class PostSerializer(serializers.ModelSerializer):
         post.save()
 
         return post
+
+    def update(self, instance, validated_data):
+        """Update a post."""
+
+        category_data = validated_data.pop('category', None)
+        author_data = validated_data.pop('author', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if category_data:
+            category = get_object_or_404(Category, **category_data)
+            instance.category = category
+
+        if author_data:
+            author = get_object_or_404(Author, **author_data)
+            instance.author = author
+
+        instance.save()
+
+        return instance
