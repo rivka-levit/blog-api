@@ -9,7 +9,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from post.models import Post, Author, Category
+from post.models import Post, Author, Category, Section
 
 POSTS_URL = reverse('post-list')
 
@@ -179,7 +179,7 @@ class PrivatePostTest(TestCase):
         self.assertEqual(post.category, self.category)
         self.assertEqual(post.author, self.author)
 
-    def create_post_with_sections(self):
+    def test_create_post_with_sections(self):
         """Test creating a post with text sections."""
 
         payload = {
@@ -226,3 +226,45 @@ class PrivatePostTest(TestCase):
             self.assertTrue(
                 post_sections.filter(sub_title=section['sub_title']).exists()
             )
+
+    def test_update_post__sections(self):
+        """Test updating the sections in a post."""
+
+        post = create_post(self.user)
+        Section.objects.create(
+            user=self.user,
+            post=post,
+            sub_title='Sample Section',
+            content='Lorem ipsum dolor sit amet, consectetur '
+                    'adipiscing elit, sed do eiusmod tempor '
+                    'incididunt ut labore et dolore magna aliqua. '
+                    'Ut enim ad minim veniam, quis nostrud '
+                    'id est laborum.'
+        )
+
+        payload = {'sections': [
+            {
+                'sub_title': 'Second Text Section',
+                'content': 'Lorem ipsum dolor sit amet, consectetur '
+                           'adipiscing elit, sed do eiusmod tempor '
+                           'incididunt ut labore et dolore magna aliqua. '
+                           'Ut enim ad minim veniam, quis nostrud '
+                           'id est laborum.',
+                'ordering': 2
+            },
+            {
+                'sub_title': 'First Text Section',
+                'content': 'Lorem ipsum dolor sit amet, consectetur '
+                           'adipiscing elit, sed do eiusmod tempor '
+                           'incididunt ut labore et dolore magna aliqua. '
+                           'Ut enim ad minim veniam, quis nostrud '
+                           'id est laborum.',
+                'ordering': 1
+            }
+        ]}
+
+        url = detail_url(post.slug)
+        r = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data['sections']), 2)

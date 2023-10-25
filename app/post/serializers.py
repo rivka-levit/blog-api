@@ -39,6 +39,7 @@ class SectionSerializer(serializers.ModelSerializer):
         model = Section
         fields = ['id', 'sub_title', 'ordering', 'content']
         read_only_fields = ['id']
+        ordering = ['ordering']
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -87,6 +88,7 @@ class PostSerializer(serializers.ModelSerializer):
 
         category_data = validated_data.pop('category', None)
         author_data = validated_data.pop('author', None)
+        sections = validated_data.pop('sections', [])
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -98,6 +100,16 @@ class PostSerializer(serializers.ModelSerializer):
         if author_data:
             author = get_object_or_404(Author, **author_data)
             instance.author = author
+
+        if sections:
+            for sect in instance.sections.all():
+                sect.delete()
+            for section in sections:
+                Section.objects.create(
+                    user=self.context['request'].user,
+                    post=instance,
+                    **section
+                )
 
         instance.save()
 
