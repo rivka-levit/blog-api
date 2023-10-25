@@ -178,3 +178,51 @@ class PrivatePostTest(TestCase):
         self.assertEqual(post.title, payload['title'])
         self.assertEqual(post.category, self.category)
         self.assertEqual(post.author, self.author)
+
+    def create_post_with_sections(self):
+        """Test creating a post with text sections."""
+
+        payload = {
+            'title': 'My Awsome Post',
+            'excerpt': 'Cool excerpt of my post.',
+            'time_read': 7,
+            'category': {'name': self.category.name, 'slug': self.category.slug},
+            'author': {'name': self.author.name, 'slug': self.author.slug},
+            'sections': [
+                {
+                    'sub_title': 'First Text Section',
+                    'content': 'Lorem ipsum dolor sit amet, consectetur '
+                               'adipiscing elit, sed do eiusmod tempor '
+                               'incididunt ut labore et dolore magna aliqua. '
+                               'Ut enim ad minim veniam, quis nostrud '
+                               'id est laborum.'
+                },
+                {
+                    'sub_title': 'Second Text Section',
+                    'content': 'Lorem ipsum dolor sit amet, consectetur '
+                               'adipiscing elit, sed do eiusmod tempor '
+                               'incididunt ut labore et dolore magna aliqua. '
+                               'Ut enim ad minim veniam, quis nostrud '
+                               'id est laborum.'
+                },
+                {
+                    'sub_title': 'Third Text Section',
+                    'content': 'Lorem ipsum dolor sit amet, consectetur '
+                               'adipiscing elit, sed do eiusmod tempor '
+                               'incididunt ut labore et dolore magna aliqua. '
+                               'Ut enim ad minim veniam, quis nostrud '
+                               'id est laborum.'
+                }
+            ]
+        }
+
+        r = self.client.post(POSTS_URL, payload, format='json')
+
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(user=self.user, title=payload['title'])
+        self.assertEqual(len(r.data['sections']), post.sections.count())
+        post_sections = post.sections.all()
+        for section in payload['sections']:
+            self.assertTrue(
+                post_sections.filter(sub_title=section['sub_title']).exists()
+            )
