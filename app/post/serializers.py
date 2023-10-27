@@ -102,8 +102,8 @@ class PostSerializer(serializers.ModelSerializer):
             instance.author = author
 
         if sections:
-            for sect in instance.sections.all():
-                sect.delete()
+            for section in instance.sections.all():
+                section.delete()
             for section in sections:
                 Section.objects.create(
                     user=self.context['request'].user,

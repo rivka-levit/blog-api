@@ -2,6 +2,8 @@
 Views for Category, Author, Post APIs.
 """
 
+from django.db.models import Prefetch
+
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -38,7 +40,7 @@ class BaseViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(BaseViewSet):
     """View for Category APIs."""
 
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('ordering')
     serializer_class = CategorySerializer
 
 
@@ -60,5 +62,9 @@ class AuthorViewSet(BaseViewSet):
 class PostViewSet(BaseViewSet):
     """View for Post APIs."""
 
-    queryset = Post.objects.all()
+    queryset = (Post.objects.all().select_related(
+        'category',
+        'author'
+    ).prefetch_related(Prefetch('sections')))
+
     serializer_class = PostSerializer
