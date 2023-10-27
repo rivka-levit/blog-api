@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
-from post.models import Category, Author, Post, Section
+from post.models import Category, Author, Post, Section, Tag
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,6 +32,15 @@ class AuthorDetailSerializer(AuthorSerializer):
         fields = ['name', 'slug', 'description']
 
 
+class TagSerializer(serializers.ModelSerializer):
+    """Serializer for Tag object."""
+
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+        read_only_fields = ['id']
+
+
 class SectionSerializer(serializers.ModelSerializer):
     """Serializer for Section object."""
 
@@ -48,18 +57,22 @@ class PostSerializer(serializers.ModelSerializer):
     category = CategorySerializer(required=False)
     author = AuthorSerializer(required=False)
     sections = SectionSerializer(many=True, required=False)
+    tags = TagSerializer(many=True, required=False)
 
     class Meta:
         model = Post
         fields = ['title', 'slug', 'category', 'author', 'excerpt', 'image',
-                  'time_read', 'created_at', 'updated_at', 'sections']
+                  'time_read', 'created_at', 'updated_at', 'sections', 'tags']
 
     def create(self, validated_data):
         """Create a post."""
 
+        auth_user = self.context['request'].user
+
         category_data = validated_data.pop('category', None)
         author_data = validated_data.pop('author', None)
         sections = validated_data.pop('sections', [])
+        tags = validated_data.pop('tags', [])
 
         post = Post.objects.create(**validated_data)
 
@@ -74,10 +87,15 @@ class PostSerializer(serializers.ModelSerializer):
         if sections:
             for section in sections:
                 Section.objects.create(
-                    user=self.context['request'].user,
+                    user=auth_user,
                     post=post,
                     **section
                 )
+
+        if tags:
+            for tag in tags:
+                tag_obj = self._get_or_create_tag(tag)
+                post.tags.add(tag_obj)
 
         post.save()
 
@@ -114,3 +132,15 @@ class PostSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+    def _get_or_create_tag(self, tag_data):
+        """Retrieve or create and return a tag object."""
+
+        auth_user = self.context['request'].user
+
+        tag_obj, created = Tag.objects.get_or_create(
+            user=auth_user,
+            **tag_data
+        )
+
+        return tag_obj

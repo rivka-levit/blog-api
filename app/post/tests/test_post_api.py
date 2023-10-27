@@ -227,7 +227,7 @@ class PrivatePostTest(TestCase):
                 post_sections.filter(sub_title=section['sub_title']).exists()
             )
 
-    def test_update_post__sections(self):
+    def test_update_post_sections(self):
         """Test updating the sections in a post."""
 
         post = create_post(self.user)
@@ -268,3 +268,22 @@ class PrivatePostTest(TestCase):
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(len(r.data['sections']), 2)
+
+    def test_create_post_with_tags(self):
+        """Test creating a post with tags."""
+
+        payload = {
+            'title': 'My Awsome Post',
+            'excerpt': 'Cool excerpt of my post.',
+            'time_read': 3,
+            'tags': [
+                {'name': 'tag1'},
+                {'name': 'tag2'}
+            ]
+        }
+
+        r = self.client.post(POSTS_URL, payload, format='json')
+
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(title=payload['title'])
+        self.assertEqual(post.tags.count(), len(payload['tags']))
