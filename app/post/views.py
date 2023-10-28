@@ -63,10 +63,10 @@ class AuthorViewSet(BaseViewSet):
 class PostViewSet(BaseViewSet):
     """View for Post APIs."""
 
-    queryset = (Post.objects.all().select_related(
+    queryset = Post.objects.all().select_related(
         'category',
         'author'
-    ).prefetch_related(Prefetch('sections')))
+    ).prefetch_related(Prefetch('sections'))
 
     serializer_class = PostSerializer
 
