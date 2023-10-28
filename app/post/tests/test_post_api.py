@@ -9,7 +9,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from post.models import Post, Author, Category, Section
+from post.models import Post, Author, Category, Section, Tag
 
 POSTS_URL = reverse('post-list')
 
@@ -287,3 +287,25 @@ class PrivatePostTest(TestCase):
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         post = Post.objects.get(title=payload['title'])
         self.assertEqual(post.tags.count(), len(payload['tags']))
+
+    def test_update_post_with_tags(self):
+        """Test updating a post with tags."""
+
+        post = create_post(self.user)
+        tag = Tag.objects.create(user=self.user, name='OldTag')
+        post.tags.add(tag)
+
+        payload = {
+            'tags': [
+                {'name': 'tag1'},
+                {'name': 'tag2'}
+            ]
+        }
+        url = detail_url(post.slug)
+
+        r = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data['tags']), 2)
+        post.refresh_from_db()
+        self.assertFalse(Post.objects.filter(tags__in=[tag]).exists())

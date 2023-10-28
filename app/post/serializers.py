@@ -77,11 +77,15 @@ class PostSerializer(serializers.ModelSerializer):
         post = Post.objects.create(**validated_data)
 
         if category_data:
-            category = get_object_or_404(Category, **category_data)
+            category = get_object_or_404(
+                Category,
+                user=auth_user,
+                **category_data
+            )
             post.category = category
 
         if author_data:
-            author = get_object_or_404(Author, **author_data)
+            author = get_object_or_404(Author, user=auth_user, **author_data)
             post.author = author
 
         if sections:
@@ -107,6 +111,7 @@ class PostSerializer(serializers.ModelSerializer):
         category_data = validated_data.pop('category', None)
         author_data = validated_data.pop('author', None)
         sections = validated_data.pop('sections', [])
+        tags = validated_data.pop('tags', [])
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -122,12 +127,20 @@ class PostSerializer(serializers.ModelSerializer):
         if sections:
             for section in instance.sections.all():
                 section.delete()
+
             for section in sections:
                 Section.objects.create(
                     user=self.context['request'].user,
                     post=instance,
                     **section
                 )
+
+        if tags:
+            instance.tags.clear()
+
+            for tag in tags:
+                tag_obj = self._get_or_create_tag(tag)
+                instance.tags.add(tag_obj)
 
         instance.save()
 
