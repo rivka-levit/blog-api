@@ -67,8 +67,6 @@ class PostSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create a post."""
 
-        auth_user = self.context['request'].user
-
         category_data = validated_data.pop('category', None)
         author_data = validated_data.pop('author', None)
         sections = validated_data.pop('sections', [])
@@ -76,33 +74,8 @@ class PostSerializer(serializers.ModelSerializer):
 
         post = Post.objects.create(**validated_data)
 
-        if category_data:
-            category = get_object_or_404(
-                Category,
-                user=auth_user,
-                **category_data
-            )
-            post.category = category
-
-        if author_data:
-            author = get_object_or_404(Author, user=auth_user, **author_data)
-            post.author = author
-
-        if sections:
-            for section in sections:
-                Section.objects.create(
-                    user=auth_user,
-                    post=post,
-                    **section
-                )
-
-        if tags:
-            for tag in tags:
-                tag_obj = self._get_or_create_tag(tag)
-                post.tags.add(tag_obj)
-
-        post.save()
-
+        self._assign_parameters(post, category_data, author_data,
+                                sections, tags)
         return post
 
     def update(self, instance, validated_data):
@@ -116,44 +89,76 @@ class PostSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        if category_data:
-            category = get_object_or_404(Category, **category_data)
-            instance.category = category
-
-        if author_data:
-            author = get_object_or_404(Author, **author_data)
-            instance.author = author
-
-        if sections:
-            for section in instance.sections.all():
-                section.delete()
-
-            for section in sections:
-                Section.objects.create(
-                    user=self.context['request'].user,
-                    post=instance,
-                    **section
-                )
-
-        if tags:
-            instance.tags.clear()
-
-            for tag in tags:
-                tag_obj = self._get_or_create_tag(tag)
-                instance.tags.add(tag_obj)
-
-        instance.save()
-
+        self._assign_parameters(instance, category_data, author_data,
+                                sections, tags)
         return instance
 
-    def _get_or_create_tag(self, tag_data):
-        """Retrieve or create and return a tag object."""
+    def _assign_parameters(self,
+                           post: Post,
+                           category_data: dict,
+                           author_data: dict,
+                           sections: list[dict],
+                           tags: list[dict]) -> None:
+        """Assign parameters to the post"""
+
+        if category_data:
+            post.category = self._get_category(category_data)
+
+        if author_data:
+            post.author = self._get_author(author_data)
+
+        if sections:
+            self._create_post_sections(sections, post)
+
+        if tags:
+            self._assign_tags(tags, post)
+
+        post.save()
+
+    def _assign_tags(self, tags: list[dict], post: Post) -> None:
+        """Get or create tags and assign them to the post."""
 
         auth_user = self.context['request'].user
 
-        tag_obj, created = Tag.objects.get_or_create(
-            user=auth_user,
-            **tag_data
-        )
+        if post.tags:
+            post.tags.clear()
 
-        return tag_obj
+        for tag_data in tags:
+            tag_obj, created = Tag.objects.get_or_create(
+                user=auth_user,
+                **tag_data
+            )
+            post.tags.add(tag_obj)
+
+        post.save()
+
+    def _get_category(self, category_data: dict) -> Category:
+        """Get and return a category from the database."""
+
+        auth_user = self.context['request'].user
+
+        return get_object_or_404(Category, user=auth_user, **category_data)
+
+    def _get_author(self, author_data: dict) -> Author:
+        """Get and return an author from the database."""
+
+        auth_user = self.context['request'].user
+
+        return get_object_or_404(Author, user=auth_user, **author_data)
+
+    def _create_post_sections(self, sections: list[dict], post: Post) -> None:
+        """Create sections for a particular post"""
+
+        auth_user = self.context['request'].user
+
+        old_sections = post.sections.all()
+        if old_sections.exists():
+            for section in old_sections:
+                section.delete()
+
+        for section_data in sections:
+            Section.objects.create(
+                user=auth_user,
+                post=post,
+                **section_data
+            )
