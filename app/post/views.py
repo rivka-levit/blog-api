@@ -10,12 +10,13 @@ from rest_framework.authentication import TokenAuthentication
 
 from core.permissions import AccessOwnerOnly
 
-from post.models import Category, Author, Post
+from post.models import Category, Author, Post, Tag
 from post.serializers import (
     CategorySerializer,
     AuthorSerializer,
     AuthorDetailSerializer,
-    PostSerializer
+    PostSerializer,
+    TagSerializer
 )
 
 
@@ -68,3 +69,11 @@ class PostViewSet(BaseViewSet):
     ).prefetch_related(Prefetch('sections')))
 
     serializer_class = PostSerializer
+
+
+class TagViewSet(BaseViewSet):
+    """View for Tag APIs."""
+
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    lookup_field = 'id'
