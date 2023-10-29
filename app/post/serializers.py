@@ -46,7 +46,6 @@ class SectionSerializer(serializers.ModelSerializer):
         model = Section
         fields = ['id', 'sub_title', 'ordering', 'content']
         read_only_fields = ['id']
-        ordering = ['ordering']
 
 
 class PostSerializer(serializers.ModelSerializer):

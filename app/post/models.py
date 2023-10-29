@@ -188,6 +188,9 @@ class Section(models.Model):
     sub_title = models.CharField(max_length=255, null=True, blank=True)
     content = models.TextField()
 
+    class Meta:
+        ordering = ['ordering', 'pk']
+
     def clean(self):
         """Check if ordering number is unique for the particula post."""
 
