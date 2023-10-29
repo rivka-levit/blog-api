@@ -3,9 +3,7 @@ Serializers for Category, Author, Post, Tag objects.
 """
 
 from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
-
 from post.models import Category, Author, Post, Section, Tag
 
 
@@ -162,3 +160,13 @@ class PostSerializer(serializers.ModelSerializer):
                 post=post,
                 **section_data
             )
+
+
+class PostImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to posts."""
+
+    class Meta:
+        model = Post
+        fields = ['slug', 'image']
+        read_only_fields = ['slug']
+        extra_kwargs = {'image': {'required': 'True'}}

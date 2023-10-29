@@ -1,6 +1,8 @@
 """
 Tests for Post APIs.
 """
+import tempfile
+import os
 
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -8,6 +10,8 @@ from django.test import TestCase
 
 from rest_framework import status
 from rest_framework.test import APIClient
+
+from PIL import Image
 
 from post.models import Post, Author, Category, Section, Tag
 
@@ -18,6 +22,12 @@ def detail_url(post_slug):
     """Create and return the url for a detail page."""
 
     return reverse('post-detail', args=[post_slug])
+
+
+def upload_image_url(post_slug):
+    """Create and return the url for a uploading an image."""
+
+    return reverse('post-upload-image', args=[post_slug])
 
 
 def create_post(user, **params):
@@ -309,3 +319,37 @@ class PrivatePostTest(TestCase):
         self.assertEqual(len(r.data['tags']), 2)
         post.refresh_from_db()
         self.assertFalse(Post.objects.filter(tags__in=[tag]).exists())
+
+
+class UploadImageTests(TestCase):
+    """Tests for uploading image."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='test_image@example.com',
+            password='test_pass_123'
+        )
+        self.client.force_authenticate(user=self.user)
+        self.post = create_post(self.user)
+
+    def tearDown(self):
+        self.post.image.delete()
+
+    def test_upload_image_to_post(self):
+        """Test uploading image to a post successfully."""
+
+        url = upload_image_url(self.post.slug)
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, 'JPEG')
+            image_file.seek(0)
+            payload = {'image': image_file}
+
+            r = self.client.post(url, payload, format='multipart')
+
+        self.post.refresh_from_db()
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertTrue(os.path.exists(self.post.image.path))
