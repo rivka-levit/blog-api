@@ -13,14 +13,15 @@ from rest_framework.authentication import TokenAuthentication
 
 from core.permissions import AccessOwnerOnly
 
-from post.models import Category, Author, Post, Tag
+from post.models import Category, Author, Post, Tag, Section
 from post.serializers import (
     CategorySerializer,
     AuthorSerializer,
     AuthorDetailSerializer,
     PostSerializer,
     TagSerializer,
-    PostImageSerializer
+    PostImageSerializer,
+    SectionSerializer
 )
 
 
@@ -79,6 +80,8 @@ class PostViewSet(BaseViewSet):
 
         if self.action == 'upload_image':
             return PostImageSerializer
+        if self.action == 'update_section':
+            return SectionSerializer
 
         return self.serializer_class
 
@@ -94,6 +97,26 @@ class PostViewSet(BaseViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['PATCH'],
+            detail=True,
+            url_path=r'update-section/(?P<sect_ord>\d+)')
+    def update_section(self, request, slug=None, sect_ord=None):
+        """Update a single section of a particular post."""
+
+        post = get_object_or_404(Post, slug=slug)
+        section = get_object_or_404(Section, post=post, ordering=sect_ord)
+        new_data = {
+            'sub_title': request.data.get('sub_title', None),
+            'ordering': request.data.get('ordering', None),
+            'content': request.data.get('content', None)
+        }
+        for key, value in new_data.items():
+            if value:
+                setattr(section, key, value)
+        section.save()
+
+        return Response(SectionSerializer(section).data, status=status.HTTP_200_OK)
 
 
 class TagViewSet(BaseViewSet):

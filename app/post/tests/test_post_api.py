@@ -320,6 +320,26 @@ class PrivatePostTest(TestCase):
         post.refresh_from_db()
         self.assertFalse(Post.objects.filter(tags__in=[tag]).exists())
 
+    def test_update_single_post_section(self):
+        """Test updating single section of a post."""
+
+        post = create_post(self.user)
+        section = Section.objects.create(
+            user=self.user,
+            post=post,
+            sub_title='Some Subtitle',
+            content='Some content.'
+        )
+        payload = {'sub_title': 'New Subtitle'}
+        url = reverse('post-update-section',
+                      args=[post.slug, section.ordering])
+
+        r = self.client.patch(url, payload)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        section.refresh_from_db()
+        self.assertEqual(section.sub_title, payload['sub_title'])
+
 
 class UploadImageTests(TestCase):
     """Tests for uploading image."""
