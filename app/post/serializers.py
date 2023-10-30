@@ -44,8 +44,7 @@ class SectionSerializer(serializers.ModelSerializer):
 
     class Meta(AuthorSerializer.Meta):
         model = Section
-        fields = ['id', 'sub_title', 'ordering', 'content']
-        read_only_fields = ['id']
+        fields = ['ordering', 'sub_title', 'content']
 
 
 class PostSerializer(serializers.ModelSerializer):
