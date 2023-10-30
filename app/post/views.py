@@ -106,14 +106,10 @@ class PostViewSet(BaseViewSet):
 
         post = get_object_or_404(Post, slug=slug)
         section = get_object_or_404(Section, post=post, ordering=sect_ord)
-        new_data = {
-            'sub_title': request.data.get('sub_title', None),
-            'ordering': request.data.get('ordering', None),
-            'content': request.data.get('content', None)
-        }
-        for key, value in new_data.items():
-            if value:
-                setattr(section, key, value)
+
+        for key, value in request.data.items():
+            setattr(section, key, value)
+
         section.save()
 
         return Response(SectionSerializer(section).data, status=status.HTTP_200_OK)
