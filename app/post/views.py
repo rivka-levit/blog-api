@@ -114,6 +114,19 @@ class PostViewSet(BaseViewSet):
 
         return Response(SectionSerializer(section).data, status=status.HTTP_200_OK)
 
+    @action(methods=['DELETE'],
+            detail=True,
+            url_path=r'delete-section/(?P<sect_ord>\d+)')
+    def delete_section(self, request, slug=None, sect_ord=None):
+        """Remove a single section of a particular post."""
+
+        post = get_object_or_404(Post, slug=slug)
+        section = get_object_or_404(Section, post=post, ordering=sect_ord)
+
+        section.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class TagViewSet(BaseViewSet):
     """View for Tag APIs."""

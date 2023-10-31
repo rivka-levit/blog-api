@@ -340,6 +340,25 @@ class PrivatePostTest(TestCase):
         section.refresh_from_db()
         self.assertEqual(section.sub_title, payload['sub_title'])
 
+    def test_delete_single_post_section(self):
+        """Test removing a single section of a post."""
+
+        post = create_post(self.user)
+        section = Section.objects.create(
+            user=self.user,
+            post=post,
+            sub_title='Some Subtitle',
+            content='Some content.'
+        )
+        url = reverse('post-delete-section',
+                      args=[post.slug, section.ordering])
+
+        r = self.client.delete(url)
+
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+        post.refresh_from_db()
+        self.assertEqual(post.sections.all().count(), 0)
+
 
 class UploadImageTests(TestCase):
     """Tests for uploading image."""
