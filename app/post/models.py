@@ -199,3 +199,25 @@ class Tag(models.Model):
         """Return a string representation of the object."""
 
         return self.name
+
+
+class Comment(models.Model):
+    """Comments for posts."""
+
+    user = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    name = models.CharField(max_length=150, null=True, blank=True)
+    message = models.TextField(max_length=1500)
+
+    def __str__(self):
+        """Return a string representation of the object."""
+
+        return f'Comment number {self.id}.'
