@@ -4,7 +4,7 @@ Serializers for Category, Author, Post, Tag objects.
 
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from post.models import Category, Author, Post, Section, Tag
+from post.models import Category, Author, Post, Section, Tag, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -45,6 +45,14 @@ class SectionSerializer(serializers.ModelSerializer):
     class Meta(AuthorSerializer.Meta):
         model = Section
         fields = ['ordering', 'sub_title', 'content']
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Serializer for Comment object."""
+
+    class Meta:
+        model = Comment
+        fields = ['name', 'message']
 
 
 class PostSerializer(serializers.ModelSerializer):
