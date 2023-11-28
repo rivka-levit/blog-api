@@ -1,9 +1,9 @@
 from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 
 from core.fields import OrderField
+from post.checks import FieldsValidator
 
 import os
 import uuid
@@ -37,24 +37,9 @@ class Category(models.Model):
     def clean(self):
         """Check if slug and ordering number is unique for related user."""
 
-        qs = Category.objects.filter(
-            user=self.user, slug=self.slug
-        ).exclude(pk=self.pk)
-
-        if qs:
-            raise ValidationError(
-                'The slug must be unique for this particular user.'
-            )
-
-        qs = Category.objects.filter(
-            user=self.user, ordering=self.ordering
-        ).exclude(pk=self.pk)
-
-        if qs:
-            raise ValidationError(
-                'The ordering number of a category must be unique for this '
-                'particular user.'
-            )
+        validator = FieldsValidator()
+        validator.check_slug(self)
+        validator.check_ordering(self)
 
     def save(self, *args, **kwargs):
         """Auto field creation and validation before saving."""
@@ -86,14 +71,8 @@ class Author(models.Model):
     def clean(self):
         """Check if slug is unique for related user."""
 
-        qs = Author.objects.filter(
-            user=self.user, slug=self.slug
-        ).exclude(pk=self.pk)
-
-        if qs:
-            raise ValidationError(
-                'The slug must be unique for this particular user.'
-            )
+        validator = FieldsValidator()
+        validator.check_slug(self)
 
     def save(self, *args, **kwargs):
         """Auto field creation and validation before saving."""
@@ -147,14 +126,8 @@ class Post(models.Model):
     def clean(self):
         """Check if slug is unique for related user."""
 
-        qs = Post.objects.filter(
-            user=self.user, slug=self.slug
-        ).exclude(pk=self.pk)
-
-        if qs:
-            raise ValidationError(
-                'The slug must be unique for this particular user.'
-            )
+        validator = FieldsValidator()
+        validator.check_slug(self)
 
     def save(self, *args, **kwargs):
         """Auto field creation and validation before saving."""
@@ -194,15 +167,8 @@ class Section(models.Model):
     def clean(self):
         """Check if ordering number is unique for the particula post."""
 
-        qs = Section.objects.filter(
-            user=self.user, ordering=self.ordering
-        ).exclude(pk=self.pk)
-
-        if qs:
-            raise ValidationError(
-                'The ordering number of a category must be unique for this '
-                'particular post.'
-            )
+        validator = FieldsValidator()
+        validator.check_ordering(self)
 
     def save(self, *args, **kwargs):
         """Auto field creation and validation before saving."""
