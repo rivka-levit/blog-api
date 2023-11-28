@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from post.models import Category, Author, Post, Section, Tag
+from post.models import Category, Author, Post, Section, Tag, Comment
 
 
 def create_category(user, **params):
@@ -161,3 +161,22 @@ class PostModelTests(TestCase):
         post.tags.add(tag)
 
         self.assertEqual(post.tags.all().count(), 1)
+
+    def test_create_comment_success(self):
+        """Test creating a comment successfully."""
+
+        post = create_post(
+            self.user,
+            category=self.category,
+            author=self.author
+        )
+        payload = {
+            'name': 'John',
+            'message': 'Some comment message.'
+        }
+
+        comment = Comment.objects.create(user=self.user, post=post, **payload)
+
+        post.refresh_from_db()
+        self.assertEqual(post.comments.count(), 1)
+        self.assertEqual(comment.name, payload['name'])
