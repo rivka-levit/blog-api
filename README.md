@@ -1,3 +1,3 @@
 # Blog RestAPI
 
-## Backend functionality for creating and managing a blog
+## API for creating and managing a blog.
