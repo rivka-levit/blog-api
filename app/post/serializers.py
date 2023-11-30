@@ -70,12 +70,14 @@ class PostSerializer(serializers.ModelSerializer):
     category = CategorySerializer(required=False)
     author = AuthorSerializer(required=False)
     sections = SectionSerializer(many=True, required=False)
+    comments = CommentReadSerializer(many=True, required=False)
     tags = TagSerializer(many=True, required=False)
 
     class Meta:
         model = Post
         fields = ['title', 'slug', 'category', 'author', 'excerpt', 'image',
-                  'time_read', 'created_at', 'updated_at', 'sections', 'tags']
+                  'time_read', 'created_at', 'updated_at', 'sections',
+                  'comments', 'tags']
 
     def create(self, validated_data):
         """Create a post."""

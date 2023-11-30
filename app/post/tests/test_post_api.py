@@ -13,7 +13,7 @@ from rest_framework.test import APIClient
 
 from PIL import Image
 
-from post.models import Post, Author, Category, Section, Tag
+from post.models import Post, Author, Category, Section, Tag, Comment
 
 POSTS_URL = reverse('post-list')
 
@@ -358,6 +358,26 @@ class PrivatePostTest(TestCase):
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
         post.refresh_from_db()
         self.assertEqual(post.sections.all().count(), 0)
+
+    def test_retrieve_post_with_comments(self):
+        """Test retrieving a post with the comments assigned."""
+
+        payload = {
+            'category': self.category,
+            'author': self.author
+        }
+        post = create_post(self.user, **payload)
+        Comment.objects.create(user=self.user, post=post,
+                               message='some msg')
+        Comment.objects.create(user=self.user, post=post,
+                               message='another msg')
+        post.refresh_from_db()
+
+        url = detail_url(post.slug)
+        r = self.client.get(url)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data['comments']), 2)
 
 
 class UploadImageTests(TestCase):
