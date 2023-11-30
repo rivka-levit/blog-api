@@ -47,12 +47,21 @@ class SectionSerializer(serializers.ModelSerializer):
         fields = ['ordering', 'sub_title', 'content']
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    """Serializer for Comment object."""
+class CommentReadSerializer(serializers.ModelSerializer):
+    """Serializer for retrieving Comment object."""
 
     class Meta:
         model = Comment
-        fields = ['name', 'message']
+        fields = ['id', 'name', 'message']
+        read_only_fields = ['id']
+
+
+class CommentWriteSerializer(serializers.ModelSerializer):
+    """Serializer for writing Comment object."""
+
+    class Meta:
+        model = Comment
+        fields = ['post', 'name', 'message']
 
 
 class PostSerializer(serializers.ModelSerializer):
