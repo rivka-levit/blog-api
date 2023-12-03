@@ -1,5 +1,5 @@
 """
-Tags for Tag APIs.
+Tests for Tag APIs.
 """
 
 from django.urls import reverse

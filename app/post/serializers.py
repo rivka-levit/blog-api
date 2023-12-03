@@ -47,21 +47,25 @@ class SectionSerializer(serializers.ModelSerializer):
         fields = ['ordering', 'sub_title', 'content']
 
 
-class CommentReadSerializer(serializers.ModelSerializer):
-    """Serializer for retrieving Comment object."""
+class CommentSerializer(serializers.ModelSerializer):
+    """Serializer for Comment object."""
+
+    post_slug = serializers.CharField(source='post.slug', required=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'name', 'message']
+        fields = ['id', 'post_slug', 'name', 'message']
         read_only_fields = ['id']
 
 
-class CommentWriteSerializer(serializers.ModelSerializer):
-    """Serializer for writing Comment object."""
-
-    class Meta:
-        model = Comment
-        fields = ['post', 'name', 'message']
+# class CommentWriteSerializer(serializers.ModelSerializer):
+#     """Serializer for writing Comment object."""
+#
+#     post_slug = serializers.CharField(source='post.slug', required=True)
+#
+#     class Meta:
+#         model = Comment
+#         fields = ['id', 'post_slug', 'name', 'message']
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -70,7 +74,7 @@ class PostSerializer(serializers.ModelSerializer):
     category = CategorySerializer(required=False)
     author = AuthorSerializer(required=False)
     sections = SectionSerializer(many=True, required=False)
-    comments = CommentReadSerializer(many=True, required=False)
+    comments = CommentSerializer(many=True, required=False)
     tags = TagSerializer(many=True, required=False)
 
     class Meta:
