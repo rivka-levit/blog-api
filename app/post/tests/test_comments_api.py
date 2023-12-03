@@ -112,6 +112,25 @@ class CommentsTests(TestCase):
         cmt.refresh_from_db()
         self.assertEqual(cmt.name, payload['name'])
 
+    def test_full_update_comment_success(self):
+        """Test full updating of a comment."""
+
+        cmt = create_comment(self.user, self.post, name='Anna')
+        url = detail_url(cmt.id)
+        post_2 = create_post(self.user, title='another title', time_read=7)
+        payload = {
+            'post_slug': post_2.slug,
+            'name': 'New Name',
+            'message': 'Changed message.'
+        }
+
+        r = self.client.put(url, payload)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        cmt.refresh_from_db()
+        for k, v in payload.items():
+            self.assertEqual(r.data[k], v)
+
     def test_delete_comment(self):
         """Test deleting a comment successfully."""
 

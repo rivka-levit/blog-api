@@ -57,15 +57,31 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'post_slug', 'name', 'message']
         read_only_fields = ['id']
 
+    def create(self, validated_data):
+        """Create a comment."""
 
-# class CommentWriteSerializer(serializers.ModelSerializer):
-#     """Serializer for writing Comment object."""
-#
-#     post_slug = serializers.CharField(source='post.slug', required=True)
-#
-#     class Meta:
-#         model = Comment
-#         fields = ['id', 'post_slug', 'name', 'message']
+        post_slug = validated_data.pop('post', None)['slug']
+
+        post = get_object_or_404(Post, slug=post_slug)
+
+        return Comment.objects.create(post=post, **validated_data)
+
+    def update(self, instance, validated_data):
+        """Update a comment."""
+
+        post_slug = validated_data.pop('post', None)
+
+        if post_slug is not None:
+            post_slug = post_slug['slug']
+            post = get_object_or_404(Post, slug=post_slug)
+            instance.post = post
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        return instance
 
 
 class PostSerializer(serializers.ModelSerializer):

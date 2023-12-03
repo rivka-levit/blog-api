@@ -13,7 +13,7 @@ from rest_framework.authentication import TokenAuthentication
 
 from core.permissions import AccessOwnerOnly
 
-from post.models import Category, Author, Post, Tag, Section
+from post.models import Category, Author, Post, Tag, Section, Comment
 from post.serializers import (
     CategorySerializer,
     AuthorSerializer,
@@ -21,7 +21,8 @@ from post.serializers import (
     PostSerializer,
     TagSerializer,
     PostImageSerializer,
-    SectionSerializer
+    SectionSerializer,
+    CommentSerializer
 )
 
 
@@ -133,4 +134,12 @@ class TagViewSet(BaseViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    lookup_field = 'id'
+
+
+class CommentViewSet(BaseViewSet):
+    """View for Comment APIs."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
     lookup_field = 'id'
