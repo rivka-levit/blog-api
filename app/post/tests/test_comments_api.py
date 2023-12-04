@@ -60,7 +60,7 @@ class CommentsTests(TestCase):
     def test_retrieve_comments_list_success(self):
         """Test retrieving list of comments successfully."""
 
-        cmt1 = create_comment(self.user, self.post)
+        create_comment(self.user, self.post)
         cmt2 = create_comment(self.user, self.post, name='Jack')
         self.post.refresh_from_db()
 

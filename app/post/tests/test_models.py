@@ -172,11 +172,13 @@ class PostModelTests(TestCase):
         )
         payload = {
             'name': 'John',
-            'message': 'Some comment message.'
+            'message': 'Some comment message.',
+            'is_visible': True
         }
 
         comment = Comment.objects.create(user=self.user, post=post, **payload)
 
         post.refresh_from_db()
         self.assertEqual(post.comments.count(), 1)
-        self.assertEqual(comment.name, payload['name'])
+        for k, v in payload.items():
+            self.assertEqual(getattr(comment, k), v)
