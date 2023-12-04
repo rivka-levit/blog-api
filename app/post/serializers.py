@@ -5,6 +5,7 @@ Serializers for Category, Author, Post, Tag objects.
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from post.models import Category, Author, Post, Section, Tag, Comment
+from drf_spectacular.utils import extend_schema_field
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -90,7 +91,8 @@ class PostSerializer(serializers.ModelSerializer):
     category = CategorySerializer(required=False)
     author = AuthorSerializer(required=False)
     sections = SectionSerializer(many=True, required=False)
-    comments = CommentSerializer(many=True, required=False)
+    comments = serializers.SerializerMethodField('get_visible_comments',
+                                                 required=False)
     tags = TagSerializer(many=True, required=False)
 
     class Meta:
@@ -127,6 +129,18 @@ class PostSerializer(serializers.ModelSerializer):
         self._assign_parameters(instance, category_data, author_data,
                                 sections, tags)
         return instance
+
+    @extend_schema_field(CommentSerializer(many=True))
+    def get_visible_comments(self, post):
+        """Return only moderated comments."""
+
+        qs = Comment.objects.filter(
+            user=self.context['request'].user,
+            post=post,
+            is_visible=True
+        )
+
+        return CommentSerializer(qs, many=True).data
 
     def _assign_parameters(self,
                            post: Post,

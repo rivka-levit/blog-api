@@ -38,7 +38,8 @@ def create_comment(user, post, **params):
 
     defaults = {
         'name': 'John',
-        'message': 'Some sample message.'
+        'message': 'Some sample message.',
+        'is_visible': True
     }
     defaults.update(**params)
 

@@ -368,9 +368,9 @@ class PrivatePostTest(TestCase):
         }
         post = create_post(self.user, **payload)
         Comment.objects.create(user=self.user, post=post,
-                               message='some msg')
+                               message='some msg', is_visible=True)
         Comment.objects.create(user=self.user, post=post,
-                               message='another msg')
+                               message='another msg', is_visible=True)
         post.refresh_from_db()
 
         url = detail_url(post.slug)
@@ -378,6 +378,21 @@ class PrivatePostTest(TestCase):
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(len(r.data['comments']), 2)
+
+    def test_retrieve_only_visible_comments_in_post(self):
+        """Test retrieving only the comments that are visible in post."""
+
+        post = create_post(self.user)
+        Comment.objects.create(user=self.user, post=post,
+                               message='some msg')
+        Comment.objects.create(user=self.user, post=post,
+                               message='another msg', is_visible=True)
+
+        url = detail_url(post.slug)
+        r = self.client.get(url)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data['comments']), 1)
 
 
 class UploadImageTests(TestCase):

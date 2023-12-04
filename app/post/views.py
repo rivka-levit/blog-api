@@ -143,3 +143,8 @@ class CommentViewSet(BaseViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_field = 'id'
+
+    def get_queryset(self):
+        """Filter the queryset."""
+
+        return super().get_queryset().filter(is_visible=True)
