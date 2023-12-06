@@ -38,8 +38,7 @@ def create_comment(user, post, **params):
 
     defaults = {
         'name': 'John',
-        'message': 'Some sample message.',
-        'is_visible': True
+        'message': 'Some sample message.'
     }
     defaults.update(**params)
 
@@ -150,6 +149,19 @@ class CommentsTests(TestCase):
         create_comment(self.user, post, is_visible=True)
 
         params = {'post': self.post.slug}
+
+        r = self.client.get(COMMENTS_URL, params)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
+
+    def test_filter_comments_visibility(self):
+        """Test filtering comments by is_visible parameter."""
+
+        create_comment(self.user, self.post)
+        create_comment(self.user, self.post, is_visible=True)
+
+        params = {'visible': 'false'}
 
         r = self.client.get(COMMENTS_URL, params)
 
