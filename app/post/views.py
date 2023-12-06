@@ -147,4 +147,12 @@ class CommentViewSet(BaseViewSet):
     def get_queryset(self):
         """Filter the queryset."""
 
-        return super().get_queryset().filter(is_visible=True)
+        qs = super().get_queryset().filter(is_visible=True)
+
+        post_slug = self.request.query_params.get('post', None)
+
+        if post_slug:
+            post = get_object_or_404(Post, slug=post_slug)
+            return qs.filter(post=post)
+
+        return qs

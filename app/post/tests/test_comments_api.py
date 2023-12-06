@@ -141,3 +141,17 @@ class CommentsTests(TestCase):
         r = self.client.delete(url)
 
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_filter_comments_to_post(self):
+        """Test filtering comments to a particular post."""
+
+        post = create_post(self.user, title='another post')
+        create_comment(self.user, self.post, is_visible=True)
+        create_comment(self.user, post, is_visible=True)
+
+        params = {'post': self.post.slug}
+
+        r = self.client.get(COMMENTS_URL, params)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
