@@ -427,7 +427,7 @@ class PrivatePostTest(TestCase):
         self.assertEqual(r.data[0]['slug'], post.slug)
 
     def test_filter_posts_by_tags(self):
-        """Tests filtering posts by tags."""
+        """Test filtering posts by tags."""
 
         tag1 = Tag.objects.create(user=self.user, name='Tag1')
         tag2 = Tag.objects.create(user=self.user, name='Tag2')
@@ -443,6 +443,20 @@ class PrivatePostTest(TestCase):
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(len(r.data), 2)
+
+    def test_filter_posts_search(self):
+        """Test filtering posts by search parameter."""
+
+        post = create_post(self.user, title='Particular Post')
+        create_post(self.user)
+
+        params = {"search": "particular"}
+
+        r = self.client.get(POSTS_URL, params)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]['title'], post.title)
 
 
 class UploadImageTests(TestCase):

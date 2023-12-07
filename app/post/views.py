@@ -4,6 +4,7 @@ Views for Category, Author, Post APIs.
 
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -94,15 +95,28 @@ class PostViewSet(BaseViewSet):
         autor_slug = self.request.query_params.get('author', None)
         category_slug = self.request.query_params.get('category', None)
         tag_ids = self.request.query_params.get('tags', None)
+        search = self.request.query_params.get('search', None)
 
-        if tag_ids:
-            ids = list(map(int, tag_ids.split(',')))
+        if search is not None:
+            queryset = queryset.filter(
+                Q(title__icontains=search) |
+                Q(excerpt__icontains=search) |
+                Q(sections__sub_title__icontains=search) |
+                Q(sections__content__icontains=search)
+            ).distinct()
+
+        if tag_ids is not None:
+            try:
+                ids = list(map(int, tag_ids.split(',')))
+            except ValueError:
+                ids = list()
+
             queryset = queryset.filter(tags__id__in=ids).distinct()
 
-        if autor_slug:
+        if autor_slug is not None:
             queryset = queryset.filter(author__slug=autor_slug)
 
-        if category_slug:
+        if category_slug is not None:
             queryset = queryset.filter(category__slug=category_slug)
 
         return queryset
