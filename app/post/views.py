@@ -93,6 +93,11 @@ class PostViewSet(BaseViewSet):
 
         autor_slug = self.request.query_params.get('author', None)
         category_slug = self.request.query_params.get('category', None)
+        tag_ids = self.request.query_params.get('tags', None)
+
+        if tag_ids:
+            ids = list(map(int, tag_ids.split(',')))
+            queryset = queryset.filter(tags__id__in=ids).distinct()
 
         if autor_slug:
             queryset = queryset.filter(author__slug=autor_slug)

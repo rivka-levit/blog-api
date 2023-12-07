@@ -411,7 +411,7 @@ class PrivatePostTest(TestCase):
         self.assertEqual(r.data[0]['slug'], post2.slug)
 
     def test_filter_posts_by_category(self):
-        """TEst filtering posts by category."""
+        """Test filtering posts by category."""
 
         category = Category.objects.create(user=self.user, name='Category 2')
 
@@ -425,6 +425,24 @@ class PrivatePostTest(TestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(len(r.data), 1)
         self.assertEqual(r.data[0]['slug'], post.slug)
+
+    def test_filter_posts_by_tags(self):
+        """Tests filtering posts by tags."""
+
+        tag1 = Tag.objects.create(user=self.user, name='Tag1')
+        tag2 = Tag.objects.create(user=self.user, name='Tag2')
+        post1 = create_post(self.user, title='post 1')
+        post1.tags.add(tag1)
+        post2 = create_post(self.user, title='post 2')
+        post2.tags.add(tag2)
+        create_post(self.user)
+
+        params = {"tags": f'{tag1.id},{tag2.id}'}
+
+        r = self.client.get(POSTS_URL, params)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 2)
 
 
 class UploadImageTests(TestCase):
