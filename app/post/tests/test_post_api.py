@@ -25,7 +25,7 @@ def detail_url(post_slug):
 
 
 def upload_image_url(post_slug):
-    """Create and return the url for a uploading an image."""
+    """Create and return the url for an uploading an image."""
 
     return reverse('post-upload-image', args=[post_slug])
 
@@ -393,6 +393,22 @@ class PrivatePostTest(TestCase):
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(len(r.data['comments']), 1)
+
+    def test_filter_posts_by_author(self):
+        """Test filtering posts by author."""
+
+        author2 = Author.objects.create(user=self.user, name='Sarah Falcon')
+
+        create_post(self.user, author=self.author)
+        post2 = create_post(self.user, title='another post', author=author2)
+
+        params = {"author": author2.slug}
+
+        r = self.client.get(POSTS_URL, params)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]['slug'], post2.slug)
 
 
 class UploadImageTests(TestCase):

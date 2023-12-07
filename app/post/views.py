@@ -86,6 +86,18 @@ class PostViewSet(BaseViewSet):
 
         return self.serializer_class
 
+    def get_queryset(self):
+        """Filter and return the queryset."""
+
+        queryset = super().get_queryset()
+
+        autor_slug = self.request.query_params.get('author', None)
+
+        if autor_slug:
+            queryset = queryset.filter(author__slug=autor_slug)
+
+        return queryset
+
     @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, slug=None):
         """Uploading image to a post."""
