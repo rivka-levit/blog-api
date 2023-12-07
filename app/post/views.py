@@ -92,9 +92,13 @@ class PostViewSet(BaseViewSet):
         queryset = super().get_queryset()
 
         autor_slug = self.request.query_params.get('author', None)
+        category_slug = self.request.query_params.get('category', None)
 
         if autor_slug:
             queryset = queryset.filter(author__slug=autor_slug)
+
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
 
         return queryset
 

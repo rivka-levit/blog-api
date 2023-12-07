@@ -410,6 +410,22 @@ class PrivatePostTest(TestCase):
         self.assertEqual(len(r.data), 1)
         self.assertEqual(r.data[0]['slug'], post2.slug)
 
+    def test_filter_posts_by_category(self):
+        """TEst filtering posts by category."""
+
+        category = Category.objects.create(user=self.user, name='Category 2')
+
+        post = create_post(self.user, category=category)
+        create_post(self.user, title='another post', category=self.category)
+
+        params = {"category": category.slug}
+
+        r = self.client.get(POSTS_URL, params)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]['slug'], post.slug)
+
 
 class UploadImageTests(TestCase):
     """Tests for uploading image."""
