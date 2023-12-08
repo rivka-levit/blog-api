@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from post.models import Category, Author, Post, Section
+from post.models import Category, Author, Post, Section, Tag, Comment
 
 
 @admin.register(Category)
@@ -23,9 +23,21 @@ class SectionInline(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['user', 'post', 'name', 'message', 'date_created',
+                    'date_updated', 'is_visible']
+    readonly_fields = ['date_created', 'date_updated']
+
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ['title', 'category', 'author', 'created_at', 'updated_at']
     prepopulated_fields = {'slug': ['title']}
     readonly_fields = ['created_at', 'updated_at']
     inlines = [SectionInline]
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ['name', 'user']

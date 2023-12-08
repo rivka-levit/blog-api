@@ -122,6 +122,7 @@ class Post(models.Model):
     time_read = models.PositiveIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = models.ManyToManyField('Tag', related_name='posts', blank=True)
 
     def clean(self):
         """Check if slug is unique for related user."""
@@ -192,7 +193,6 @@ class Tag(models.Model):
         on_delete=models.CASCADE,
         related_name='tags'
     )
-    post = models.ManyToManyField(to=Post, related_name='tags')
     name = models.CharField(max_length=100)
 
     def __str__(self):
