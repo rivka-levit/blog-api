@@ -20,6 +20,7 @@ from post.serializers import (
     AuthorSerializer,
     AuthorDetailSerializer,
     PostSerializer,
+    PostListSerializer,
     TagSerializer,
     PostImageSerializer,
     SectionSerializer,
@@ -80,6 +81,8 @@ class PostViewSet(BaseViewSet):
     def get_serializer_class(self):
         """Return the proper serializer class for a particular request."""
 
+        if self.action == 'list':
+            return PostListSerializer
         if self.action == 'upload_image':
             return PostImageSerializer
         if self.action == 'update_section':

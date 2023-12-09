@@ -189,6 +189,18 @@ class PrivatePostTest(TestCase):
         self.assertEqual(post.category, self.category)
         self.assertEqual(post.author, self.author)
 
+    def test_post_list_without_sections_comments(self):
+        """Test retrieving post list with neither sections nor comments."""
+
+        create_post(self.user, title='Check Sections and Comments')
+
+        r = self.client.get(POSTS_URL)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
+        self.assertNotIn('sections', r.data[0])
+        self.assertNotIn('comments', r.data[0])
+
     def test_create_post_with_sections(self):
         """Test creating a post with text sections."""
 
@@ -236,6 +248,22 @@ class PrivatePostTest(TestCase):
             self.assertTrue(
                 post_sections.filter(sub_title=section['sub_title']).exists()
             )
+
+    def test_retrieve_detail_post_with_sections_comments(self):
+        """Test retrieving a single post with sections and comments."""
+
+        post = create_post(self.user, title='Single wint Sections')
+        Section.objects.create(user=self.user, post=post,
+                               content='Some content')
+        Comment.objects.create(user=self.user, post=post,
+                               message='some message')
+
+        url = detail_url(post.slug)
+        r = self.client.get(url)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertIn('sections', r.data)
+        self.assertIn('comments', r.data)
 
     def test_update_post_sections(self):
         """Test updating the sections in a post."""

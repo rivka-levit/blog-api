@@ -213,6 +213,14 @@ class PostSerializer(serializers.ModelSerializer):
             )
 
 
+class PostListSerializer(PostSerializer):
+    """Serializer for retrieving list of posts."""
+
+    class Meta(PostSerializer.Meta):
+        fields = ['title', 'slug', 'category', 'author', 'excerpt', 'image',
+                  'time_read', 'created_at', 'updated_at', 'tags']
+
+
 class PostImageSerializer(serializers.ModelSerializer):
     """Serializer for uploading images to posts."""
 
