@@ -97,8 +97,8 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['title', 'slug', 'category', 'author', 'excerpt', 'image',
-                  'time_read', 'created_at', 'updated_at', 'sections',
+        fields = ['title', 'slug', 'excerpt', 'image', 'time_read',
+                  'created_at', 'updated_at', 'category', 'author', 'sections',
                   'comments', 'tags']
 
     def create(self, validated_data):
@@ -217,8 +217,8 @@ class PostListSerializer(PostSerializer):
     """Serializer for retrieving list of posts."""
 
     class Meta(PostSerializer.Meta):
-        fields = ['title', 'slug', 'category', 'author', 'excerpt', 'image',
-                  'time_read', 'created_at', 'updated_at', 'tags']
+        fields = ['title', 'slug', 'excerpt', 'image', 'time_read',
+                  'created_at', 'updated_at', 'category', 'author', 'tags']
 
 
 class PostImageSerializer(serializers.ModelSerializer):
