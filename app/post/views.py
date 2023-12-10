@@ -27,6 +27,13 @@ from post.serializers import (
     CommentSerializer
 )
 
+from drf_spectacular.utils import (
+    extend_schema_view,
+    extend_schema,
+    OpenApiParameter,
+    OpenApiTypes
+)
+
 
 class BaseViewSet(viewsets.ModelViewSet):
     """Base view set for APIs."""
@@ -68,6 +75,59 @@ class AuthorViewSet(BaseViewSet):
         return self.serializer_class
 
 
+@extend_schema_view(
+    list=extend_schema(
+        description='List of posts.',
+        parameters=[
+            OpenApiParameter(
+                name='author',
+                description='The slug of the author.',
+                type=OpenApiTypes.STR,
+                required=False
+            ),
+            OpenApiParameter(
+                name='category',
+                description='The slug of the category.',
+                type=OpenApiTypes.STR,
+                required=False
+            ),
+            OpenApiParameter(
+                name='tags',
+                description="Comma separated list of tags' ids.",
+                type=OpenApiTypes.STR,
+                required=False
+            ),
+            OpenApiParameter(
+                name='search',
+                description='The search term.',
+                type=OpenApiTypes.STR,
+                required=False
+            )
+        ]
+    ),
+    create=extend_schema(
+        description='Create a new post.'
+    ),
+    update=extend_schema(
+        description='Full update of the post.'
+    ),
+    partial_update=extend_schema(
+        description='Partial update of the post.'
+    ),
+    destroy=extend_schema(
+        description='Delete an existing post.'
+    ),
+    upload_image=extend_schema(
+        description='Upload an image of the post.'
+    ),
+    update_section=extend_schema(
+        description='Update a single section of the post. Required parameters: '
+                    'post slug, ordering number of the section.',
+    ),
+    delete_section=extend_schema(
+        description='Delete a single existing section of the post.'
+    )
+)
 class PostViewSet(BaseViewSet):
     """View for Post APIs."""
 
@@ -175,6 +235,37 @@ class TagViewSet(BaseViewSet):
     lookup_field = 'id'
 
 
+@extend_schema_view(
+    list=extend_schema(
+        description='List of comments.',
+        parameters=[
+            OpenApiParameter(
+                name='post',
+                description='The slug of the post.',
+                type=OpenApiTypes.STR,
+                required=False
+            ),
+            OpenApiParameter(
+                name='visible',
+                description='Whether or not the comment is visible in the post.',
+                type=OpenApiTypes.BOOL,
+                required=False
+            )
+        ]
+    ),
+    create=extend_schema(
+        description='Create a new comment.'
+    ),
+    update=extend_schema(
+        description='Full update of the comment.'
+    ),
+    partial_update=extend_schema(
+        description='Partial update of the comment.'
+    ),
+    destroy=extend_schema(
+        description='Delete an existing comment.'
+    )
+)
 class CommentViewSet(BaseViewSet):
     """View for Comment APIs."""
 

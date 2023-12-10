@@ -55,7 +55,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'post_slug', 'name', 'message']
+        fields = ['id', 'post_slug', 'name', 'message', 'is_visible']
         read_only_fields = ['id']
 
     def create(self, validated_data):
