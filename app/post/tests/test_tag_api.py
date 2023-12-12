@@ -76,7 +76,7 @@ class PrivateTagTests(TestCase):
         r = self.client.get(TAGS_URL)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 2)
+        self.assertEqual(len(r.data['results']), 2)
 
     def test_create_tag_assign_user_success(self):
         """Test creating a tag and assigning it to the current user."""

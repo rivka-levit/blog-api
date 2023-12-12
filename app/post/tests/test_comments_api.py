@@ -67,9 +67,9 @@ class CommentsTests(TestCase):
         r = self.client.get(COMMENTS_URL)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 2)
-        self.assertEqual(r.data[1]['name'], cmt2.name)
-        for comment in r.data:
+        self.assertEqual(len(r.data['results']), 2)
+        self.assertEqual(r.data['results'][1]['name'], cmt2.name)
+        for comment in r.data['results']:
             self.assertEqual(comment['post_slug'], self.post.slug)
 
     def test_create_comment_success(self):
@@ -153,7 +153,7 @@ class CommentsTests(TestCase):
         r = self.client.get(COMMENTS_URL, params)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 1)
+        self.assertEqual(len(r.data['results']), 1)
 
     def test_filter_comments_visibility(self):
         """Test filtering comments by is_visible parameter."""
@@ -166,4 +166,4 @@ class CommentsTests(TestCase):
         r = self.client.get(COMMENTS_URL, params)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 1)
+        self.assertEqual(len(r.data['results']), 1)

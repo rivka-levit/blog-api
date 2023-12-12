@@ -65,7 +65,7 @@ class PrivateAuthorTest(TestCase):
         r = self.client.get(AUTHORS_URL)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 2)
+        self.assertEqual(len(r.data['results']), 2)
 
     def test_create_author_assign_user_success(self):
         """Test creating an author and assigning it to the current user."""

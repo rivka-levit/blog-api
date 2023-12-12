@@ -63,7 +63,7 @@ class PrivateCategoryTest(TestCase):
         r = self.client.get(CATEGORIES_URL)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 2)
+        self.assertEqual(len(r.data['results']), 2)
 
     def test_create_category_assign_user_success(self):
         """Test creating a category and assigning it to the current user."""

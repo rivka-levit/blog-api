@@ -82,7 +82,7 @@ class PrivatePostTest(TestCase):
         r = self.client.get(POSTS_URL)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 2)
+        self.assertEqual(len(r.data['results']), 2)
 
     def test_create_post_assign_user_success(self):
         """Test creating a post and assigning it to the current user."""
@@ -197,9 +197,9 @@ class PrivatePostTest(TestCase):
         r = self.client.get(POSTS_URL)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 1)
-        self.assertNotIn('sections', r.data[0])
-        self.assertNotIn('comments', r.data[0])
+        self.assertEqual(len(r.data['results']), 1)
+        self.assertNotIn('sections', r.data['results'][0])
+        self.assertNotIn('comments', r.data['results'][0])
 
     def test_create_post_with_sections(self):
         """Test creating a post with text sections."""
@@ -435,8 +435,8 @@ class PrivatePostTest(TestCase):
         r = self.client.get(POSTS_URL, params)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 1)
-        self.assertEqual(r.data[0]['slug'], post2.slug)
+        self.assertEqual(len(r.data['results']), 1)
+        self.assertEqual(r.data['results'][0]['slug'], post2.slug)
 
     def test_filter_posts_by_category(self):
         """Test filtering posts by category."""
@@ -451,8 +451,8 @@ class PrivatePostTest(TestCase):
         r = self.client.get(POSTS_URL, params)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 1)
-        self.assertEqual(r.data[0]['slug'], post.slug)
+        self.assertEqual(len(r.data['results']), 1)
+        self.assertEqual(r.data['results'][0]['slug'], post.slug)
 
     def test_filter_posts_by_tags(self):
         """Test filtering posts by tags."""
@@ -470,7 +470,7 @@ class PrivatePostTest(TestCase):
         r = self.client.get(POSTS_URL, params)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 2)
+        self.assertEqual(len(r.data['results']), 2)
 
     def test_filter_posts_search(self):
         """Test filtering posts by search parameter."""
@@ -483,8 +483,22 @@ class PrivatePostTest(TestCase):
         r = self.client.get(POSTS_URL, params)
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 1)
-        self.assertEqual(r.data[0]['title'], post.title)
+        self.assertEqual(len(r.data['results']), 1)
+        self.assertEqual(r.data['results'][0]['title'], post.title)
+
+    def test_posts_pagination(self):
+        """Test paginating the list of posts."""
+
+        for i in range(1, 22):
+            create_post(self.user, title=f'Title {i}',)
+
+        url_page2 = POSTS_URL + '?page=2'
+
+        r1 = self.client.get(POSTS_URL)
+        r2 = self.client.get(url_page2)
+
+        self.assertEqual(len(r1.data['results']), 20)
+        self.assertEqual(len(r2.data['results']), 1)
 
 
 class UploadImageTests(TestCase):

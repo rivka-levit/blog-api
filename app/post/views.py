@@ -63,7 +63,7 @@ class CategoryViewSet(BaseViewSet):
 class AuthorViewSet(BaseViewSet):
     """View for Author APIs."""
 
-    queryset = Author.objects.all()
+    queryset = Author.objects.all().order_by('name')
     serializer_class = AuthorDetailSerializer
 
     def get_serializer_class(self):
@@ -182,7 +182,7 @@ class PostViewSet(BaseViewSet):
         if category_slug is not None:
             queryset = queryset.filter(category__slug=category_slug)
 
-        return queryset
+        return queryset.order_by('created_at')
 
     @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, slug=None):
@@ -230,7 +230,7 @@ class PostViewSet(BaseViewSet):
 class TagViewSet(BaseViewSet):
     """View for Tag APIs."""
 
-    queryset = Tag.objects.all()
+    queryset = Tag.objects.all().order_by('id')
     serializer_class = TagSerializer
     lookup_field = 'id'
 
@@ -290,4 +290,4 @@ class CommentViewSet(BaseViewSet):
         elif visible == 'true':
             qs = qs.filter(is_visible=True)
 
-        return qs
+        return qs.order_by('id')
